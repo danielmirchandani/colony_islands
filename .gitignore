@@ -1,2 +1,6 @@
+
+# Exclude local configuration
 lib/config.php
+
+# Exclude composer libraries.
 /vendor/
