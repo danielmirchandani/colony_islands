@@ -161,7 +161,7 @@
 	 */
 	function colonyAuthenticate($needsAdmin = FALSE)
 	{
-		return colonyAuthenticateGoogleIdentity($needsAdmin);
+		return colonyAuthenticateHTTP($needsAdmin);
 	}
 
 	/**
