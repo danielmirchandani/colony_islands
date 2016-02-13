@@ -2,6 +2,12 @@
 	require("config.php");
 	require("PasswordHash.php");
 
+	# Composer autoloader
+	require(__DIR__ . "/../vendor/autoload.php");
+
+	# Google API
+	require("Google/Client.php");
+
 	# Colors players can pick (These color names have to correspond to the
 	# colors in colony.css)
 	$colors = array(
@@ -155,7 +161,7 @@
 	 */
 	function colonyAuthenticate($needsAdmin = FALSE)
 	{
-		return colonyAuthenticateHTTP($needsAdmin);
+		return colonyAuthenticateGoogleIdentity($needsAdmin);
 	}
 
 	/**
@@ -268,6 +274,93 @@
 		$statement->closeCursor();
 
 		return array($db, $player);
+	}
+
+	function colonyAuthenticateGoogleIdentity($needsAdmin = FALSE)
+	{
+		session_start();
+
+		global $conf;
+		$client_id = $conf["google_client_id"];
+		$client_secret = $conf["google_client_secret"];
+		$redirect_uri = $conf["google_redirect_uri"];
+
+		$client = new Google_Client();
+		$client->setClientId($client_id);
+		$client->setClientSecret($client_secret);
+		$client->setRedirectUri($redirect_uri);
+		$client->setScopes('email');
+
+		if (isset($_REQUEST['logout']))
+		{
+			unset($_SESSION['access_token']);
+		}
+
+		if (isset($_GET['code']))
+		{
+			$client->authenticate($_GET['code']);
+			$_SESSION['access_token'] = $client->getAccessToken();
+			$redirect = $conf["base_url"];
+			header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));
+			exit();
+		}
+
+		if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
+			$client->setAccessToken($_SESSION['access_token']);
+		}
+		else
+		{
+			$authUrl = $client->createAuthUrl();
+			header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+			exit();
+		}
+
+		if ($client->getAccessToken())
+		{
+			$_SESSION['access_token'] = $client->getAccessToken();
+			$token_data = $client->verifyIdToken()->getAttributes();
+
+			if (!empty($token_data['payload']['email'])) {
+				$emailAddress = $token_data['payload']['email'];
+
+				$db = colonyConnectDatabase();
+
+				$statement = $db->prepare("
+					SELECT
+						displayName,
+						ID,
+						isAdmin,
+						theme
+					FROM col_players
+					WHERE emailAddress = :email
+				");
+				$statement->bindValue("email", $emailAddress);
+				$statement->execute();
+
+				# Break on the first player found
+				$player = NULL;
+				while(FALSE !== ($row = $statement->fetch()))
+				{
+					$playerID = intval($row['ID']);
+
+					$player = array(
+						"displayName" => htmlspecialchars($row["displayName"]),
+						"emailAddress" => htmlspecialchars($emailAddress),
+						"ID" => $playerID,
+						"isAdmin" => intval($row["isAdmin"]),
+						"theme" => intval($row["theme"])
+					);
+				}
+				$statement->closeCursor();
+
+				if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
+					return array($db, $player);
+			}
+		}
+
+		header("HTTP/1.0 401 Unauthorized");
+		header("WWW-Authenticate: Basic realm=\"Colony Islands\"");
+		colonyError("Invalid username/password. Contact Dan for assistance.");
 	}
 
 	/**

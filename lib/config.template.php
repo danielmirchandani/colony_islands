@@ -9,6 +9,10 @@ $conf["email_from"] = "";
 
 $conf["email_reply_to"] = "";
 
+$conf["google_client_id"] = "";
+$conf["google_client_secret"] = "";
+$conf["google_redirect_uri"] = $conf["base_url"] . "";
+
 $database["password"] = "";
 
 # See the "dsn" parameter at http://php.net/manual/en/pdo.construct.php for the
