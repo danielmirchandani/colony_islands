@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html data-ng-app="ColonyIslands" data-ng-strict-di>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="favicon.ico" type="image/vnd.microsoft.icon">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<title>Colony Islands API Test</title>
+<div class="container">
+
+<div data-ng-controller="Authentication">
+	<h1>Authentication</h1>
+	<div data-ng-show="model.token">
+		<p>You are logged in as {{model.displayName}} with token {{model.token}}</p>
+	</div>
+	<div data-ng-hide="model.token">
+		<p>You are not logged in</p>
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label for="loginEmail" class="col-sm-1">Email</label>
+				<div class="col-sm-11"><input data-ng-model="model.emailAddress" id="loginEmail" type="email" class="form-control"></div>
+			</div>
+			<div class="form-group">
+				<label for="loginPassword" class="col-sm-1">Password</label>
+				<div class="col-sm-11"><input data-ng-model="model.password" id="loginPassword" type="password" class="form-control"></div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-1 col-sm-11"><input data-ng-click="model.logIn()" type="submit" value="Log in" class="btn btn-default"></div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div data-ng-controller="PlayerInfo">
+</div>
+
+</div>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular-resource.min.js"></script>
+<script type="text/javascript">
+(function(angular, localStorage) {
+	"use strict";
+
+	var app = angular.module('ColonyIslands', ['ngResource']);
+
+	app.controller('Authentication', ['$scope', '$resource', function ($scope, $resource) {
+		var APIAuth;
+
+		// REST defines POST as adding a new item to a collection and PUT as
+		// replacing an item. $resource.save() uses POST even when the object
+		// already exists, so define custom "update" methods to use instead.
+		APIAuth = $resource("api/auth", {}, {
+			update: {method: "PUT"},
+		});
+
+		$scope.model = {
+			displayName: undefined,
+			emailAddress: undefined,
+			logIn: function () {
+				APIAuth.save({}, {
+					email: $scope.model.emailAddress,
+					password: $scope.model.password,
+				}, function (data) {
+					console.log(data);
+				}, function (error) {
+					console.error(error.data);
+				})
+			},
+			password: undefined,
+			token: localStorage.colony_token,
+		};
+	}]);
+
+	app.controller('PlayerInfo', ['$scope', '$resource', function ($scope, $resource) {
+		var PlayerInfo;
+
+		PlayerInfo = $resource("api/player_info");
+		$scope.model = {
+			
+		};
+	}]);
+})(angular, localStorage);
+</script>
+</html>

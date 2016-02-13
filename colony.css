@@ -1,0 +1,140 @@
+#boardImage
+{
+	position: absolute;
+	border: 0px;
+	left: 0px;
+	top: 0px;
+}
+
+#mouseCanvas
+{
+	position: absolute;
+	border: 0px;
+	left: 0px;
+	top: 0px;
+}
+
+.Brick
+{
+	background-color: #F66;
+	color: black;
+}
+
+.Grain
+{
+	background-color: #FD6;
+	color: black;
+}
+
+.Lumber
+{
+	background-color: #4C4;
+	color: black;
+}
+
+.Ore
+{
+	background-color: #CCC;
+	color: black;
+}
+
+.Wool
+{
+	background-color: #8F8;
+	color: black;
+}
+
+/*
+	These colors have to correspond to the colors in board.js and the names in
+	common.php
+*/
+.playerColor0
+{
+	background-color: #FFF;
+	color: black;
+}
+
+.playerColor1
+{
+	background-color: #F88;
+	color: black;
+}
+
+.playerColor2
+{
+	background-color: #8F8;
+	color: black;
+}
+
+.playerColor3
+{
+	background-color: #88F;
+	color: black;
+}
+
+.playerColor4
+{
+	background-color: #FF8;
+	color: black;
+}
+
+.playerColor5
+{
+	background-color: #8FF;
+	color: black;
+}
+
+.playerColor6
+{
+	background-color: #F8F;
+	color: black;
+}
+
+/* For any element that needs to be hidden/unhidden */
+.hidden
+{
+	display: none;
+}
+
+/* This hovering idea came from http://www.visibilityinherit.com/code/css-popup-image.php */
+.hoverShowIMG:hover
+{
+	border: 0; /* IE6 needs this to show the IMG */
+}
+
+.hoverShowIMG img
+{
+	background-color: white;
+	border: 1px solid black;
+	padding: 0.1em;
+	position: absolute;
+	visibility: hidden;
+}
+
+.hoverShowIMG:hover img
+{
+	visibility: visible;
+}
+
+.theme-dark body {
+	background-color: #000;
+	color: #FFF;
+}
+
+.theme-light h1
+{
+	border: 1px solid #000;
+	border-radius: 10px;
+	padding: .2em;
+}
+
+.theme-dark h1 {
+	border: 1px solid #FFF;
+	border-radius: 10px;
+	color: #FFF;
+	padding: .2em;
+}
+
+.theme-dark a {
+	color: #CCC;
+}
