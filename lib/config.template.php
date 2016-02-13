@@ -3,6 +3,8 @@
 # This file contains a template configuration which should be copied to
 # "config.php" with the correct values filled in.
 
+# This URL should be a complete URL that users can follow to get to the
+# homepage (for example: "http://example.com/colony/")
 $conf["base_url"] = "";
 
 $conf["email_from"] = "";
