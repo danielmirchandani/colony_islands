@@ -283,7 +283,7 @@
 		global $conf;
 		$client_id = $conf["google_client_id"];
 		$client_secret = $conf["google_client_secret"];
-		$redirect_uri = $conf["google_redirect_uri"];
+		$redirect_uri = $conf["base_url"] . "index.php";
 
 		$client = new Google_Client();
 		$client->setClientId($client_id);
@@ -350,6 +350,7 @@
 						"isAdmin" => intval($row["isAdmin"]),
 						"theme" => intval($row["theme"])
 					);
+					break;
 				}
 				$statement->closeCursor();
 

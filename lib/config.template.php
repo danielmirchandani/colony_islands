@@ -11,7 +11,6 @@ $conf["email_reply_to"] = "";
 
 $conf["google_client_id"] = "";
 $conf["google_client_secret"] = "";
-$conf["google_redirect_uri"] = $conf["base_url"] . "";
 
 $database["password"] = "";
 
