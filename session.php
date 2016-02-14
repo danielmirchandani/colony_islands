@@ -1,6 +1,6 @@
 <?php
 	require("lib/common.php");
-	list($db, $loggedIn) = colonyAuthenticateCookie();
+	list($db, $loggedIn) = colonyAuthenticateGoogleIdentity();
 
 	colonyHTMLStart();
 ?>

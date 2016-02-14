@@ -1,8 +1,8 @@
 <?php
 	require("lib/common.php");
 
-	# Use a largish negative number to delete the cookie
-	colonyCookieSession("", -1000);
+	session_start();
+	unset($_SESSION['access_token']);
 
 	colonyHTMLStart();
 ?>
