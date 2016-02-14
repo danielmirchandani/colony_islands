@@ -5,6 +5,7 @@
 
 # This URL should be a complete URL that users can follow to get to the
 # homepage (for example: "http://example.com/colony/")
+# There is a bug where this URL has to be "/colony/" directly under the domain.
 $conf["base_url"] = "";
 
 $conf["email_from"] = "";
@@ -12,6 +13,7 @@ $conf["email_from"] = "";
 $conf["email_reply_to"] = "";
 
 $conf["google_client_id"] = "";
+
 $conf["google_client_secret"] = "";
 
 $database["password"] = "";
