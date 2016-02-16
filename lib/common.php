@@ -300,6 +300,9 @@
 		{
 			$client->authenticate($_GET['code']);
 			$_SESSION['access_token'] = $client->getAccessToken();
+			// Create a new session id to prevent session fixation.
+			session_regenerate_id();
+			// Redirect to a url that doesn't include the code query argument.
 			$redirect = $conf["base_url"];
 			header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));
 			exit();
