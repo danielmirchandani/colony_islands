@@ -10,10 +10,11 @@
 	$client->setClientSecret($conf["google_client_secret"]);
 	$client->setScopes("email");
 
+	session_start();
+
 	$token = $client->fetchAccessTokenWithAuthCode($_GET["code"]);
 	$_SESSION["id_token"] = $token;
 
 	colonyAuthenticateGoogleIdentity();
 
-	session_start();
 	header("Location: " . filter_var($_SESSION["redirect"], FILTER_SANITIZE_URL));
