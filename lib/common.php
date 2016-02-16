@@ -275,53 +275,41 @@
 
 	function colonyAuthenticateGoogleIdentity($needsAdmin = FALSE)
 	{
+		# For safety while developing, use HTTP authentication in
+		# addition
+		list($db, $player) = colonyAuthenticateHTTP($needsAdmin);
+
 		session_start();
 
 		global $conf;
 		$client_id = $conf["google_client_id"];
 		$client_secret = $conf["google_client_secret"];
-		$redirect_uri = $conf["base_url"] . "index.php";
+		$redirect_uri = $conf["base_url"] . "login.php";
 
 		$client = new Google_Client();
 		$client->setClientId($client_id);
 		$client->setClientSecret($client_secret);
 		$client->setRedirectUri($redirect_uri);
-		$client->setScopes('email');
+		$client->setScopes("email");
 
-		if (isset($_REQUEST['logout']))
-		{
-			unset($_SESSION['access_token']);
-		}
-
-		if (isset($_GET['code']))
-		{
-			$client->authenticate($_GET['code']);
-			$_SESSION['access_token'] = $client->getAccessToken();
-			// Create a new session id to prevent session fixation.
-			session_regenerate_id();
-			// Redirect to a url that doesn't include the code query argument.
-			$redirect = $conf["base_url"];
-			header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));
-			exit();
-		}
-
-		if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-			$client->setAccessToken($_SESSION['access_token']);
+		if (isset($_SESSION["id_token"]) && $_SESSION["id_token"]) {
+			$client->setAccessToken($_SESSION["id_token"]);
 		}
 		else
 		{
+			$_SESSION["redirect"] = $_SERVER["REQUEST_URI"] . $_SERVER["QUERY_STRING"];
 			$authUrl = $client->createAuthUrl();
-			header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+			header("Location: " . filter_var($authUrl, FILTER_SANITIZE_URL));
 			exit();
 		}
 
 		if ($client->getAccessToken())
 		{
-			$_SESSION['access_token'] = $client->getAccessToken();
+			$_SESSION["id_token"] = $client->getAccessToken();
 			$token_data = $client->verifyIdToken();
 
-			if (!empty($token_data['email'])) {
-				$emailAddress = $token_data['email'];
+			if (!empty($token_data["email"])) {
+				$emailAddress = $token_data["email"];
 
 				$db = colonyConnectDatabase();
 
@@ -341,7 +329,7 @@
 				$player = NULL;
 				while(FALSE !== ($row = $statement->fetch()))
 				{
-					$playerID = intval($row['ID']);
+					$playerID = intval($row["ID"]);
 
 					$player = array(
 						"displayName" => htmlspecialchars($row["displayName"]),
