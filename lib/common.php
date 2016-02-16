@@ -5,9 +5,6 @@
 	# Composer autoloader
 	require(__DIR__ . "/../vendor/autoload.php");
 
-	# Google API
-	require("Google/Client.php");
-
 	# Colors players can pick (These color names have to correspond to the
 	# colors in colony.css)
 	$colors = array(
@@ -321,10 +318,10 @@
 		if ($client->getAccessToken())
 		{
 			$_SESSION['access_token'] = $client->getAccessToken();
-			$token_data = $client->verifyIdToken()->getAttributes();
+			$token_data = $client->verifyIdToken();
 
-			if (!empty($token_data['payload']['email'])) {
-				$emailAddress = $token_data['payload']['email'];
+			if (!empty($token_data['email'])) {
+				$emailAddress = $token_data['email'];
 
 				$db = colonyConnectDatabase();
 

@@ -1,6 +1,6 @@
 {
     "name": "danielmirchandani/colony_islands",
     "require": {
-        "google/apiclient": "1.0.*@beta"
+        "google/apiclient": "^2.0.0@RC"
     }
 }
