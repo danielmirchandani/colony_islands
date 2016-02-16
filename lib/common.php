@@ -292,7 +292,8 @@
 		$client->setRedirectUri($redirect_uri);
 		$client->setScopes("email");
 
-		if (isset($_SESSION["id_token"]) && $_SESSION["id_token"]) {
+		if(!empty($_SESSION["id_token"]) && isset($_SESSION["id_token"]["id_token"]))
+		{
 			$client->setAccessToken($_SESSION["id_token"]);
 		}
 		else
