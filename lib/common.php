@@ -162,49 +162,6 @@
 	}
 
 	/**
-	 * Returns the result of calling colonyAuthenticateEmailPassword with
-	 * the cookie data previously sent to the client or sends a request for
-	 * authentication if not authenticated.
-	 */
-	function colonyAuthenticateCookie($needsAdmin = FALSE)
-	{
-		# For safety while developing, use HTTP authentication in
-		# addition
-		list($db, $player) = colonyAuthenticateHTTP($needsAdmin);
-
-		$db = colonyConnectDatabase();
-
-		if(array_key_exists("sessionID", $_COOKIE))
-		{
-			$sessionID = $_COOKIE["sessionID"];
-
-			# Obviously, checking a real session ID should use
-			# the database
-			if("value" === $sessionID)
-				return array($db, $player);
-		}
-
-		colonyErrorStart();
-?>
-<p>You are not logged in.</p>
-<form action="login.php" method="POST">
-	<div class="form-group">
-		<label for="loginEmailAddress">Email address</label>
-		<input class="form-control" id="loginEmailAddress" name="emailAddress" type="text">
-	</div>
-	<div class="form-group">
-		<label for="loginPassword">Password</label>
-		<input class="form-control" id="loginPassword" name="password" type="password">
-	</div>
-	<div class="form-group">
-		<input class="btn btn-primary" type="submit" value="Submit">
-	</div>
-</form>
-<?php
-		colonyErrorEnd();
-	}
-
-	/**
 	 * Returns an array of (database connection, player information) where
 	 * "player information" is NULL if not authenticated or an array with
 	 * keys ("displayName", "emailAddress", "ID", "isAdmin").
