@@ -267,6 +267,11 @@
 ?>
 </div>
 </div>
+<div class="row">
+<div class="col-xs-12">
+	<p>Development card images and resource card images copyright Karen Landry.</p>
+</div>
+</div>
 <?php
 	}
 ?>

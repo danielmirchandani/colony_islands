@@ -5,9 +5,6 @@
 	# Composer autoloader
 	require(__DIR__ . "/../vendor/autoload.php");
 
-	# Google API
-	require("Google/Client.php");
-
 	# Colors players can pick (These color names have to correspond to the
 	# colors in colony.css)
 	$colors = array(
@@ -157,54 +154,11 @@
 	}
 
 	/**
-         * Returns the result of calling colonyAuthenticateHTTP.
+	 * Returns the result of calling colonyAuthenticateHTTP.
 	 */
 	function colonyAuthenticate($needsAdmin = FALSE)
 	{
 		return colonyAuthenticateHTTP($needsAdmin);
-	}
-
-	/**
-	 * Returns the result of calling colonyAuthenticateEmailPassword with
-	 * the cookie data previously sent to the client or sends a request for
-	 * authentication if not authenticated.
-	 */
-	function colonyAuthenticateCookie($needsAdmin = FALSE)
-	{
-		# For safety while developing, use HTTP authentication in
-		# addition
-		list($db, $player) = colonyAuthenticateHTTP($needsAdmin);
-
-		$db = colonyConnectDatabase();
-
-		if(array_key_exists("sessionID", $_COOKIE))
-		{
-			$sessionID = $_COOKIE["sessionID"];
-
-			# Obviously, checking a real session ID should use
-			# the database
-			if("value" === $sessionID)
-				return array($db, $player);
-		}
-
-		colonyErrorStart();
-?>
-<p>You are not logged in.</p>
-<form action="login.php" method="POST">
-	<div class="form-group">
-		<label for="loginEmailAddress">Email address</label>
-		<input class="form-control" id="loginEmailAddress" name="emailAddress" type="text">
-	</div>
-	<div class="form-group">
-		<label for="loginPassword">Password</label>
-		<input class="form-control" id="loginPassword" name="password" type="password">
-	</div>
-	<div class="form-group">
-		<input class="btn btn-primary" type="submit" value="Submit">
-	</div>
-</form>
-<?php
-		colonyErrorEnd();
 	}
 
 	/**
@@ -278,85 +232,71 @@
 
 	function colonyAuthenticateGoogleIdentity($needsAdmin = FALSE)
 	{
+		# For safety while developing, use HTTP authentication in
+		# addition
+		colonyAuthenticateHTTP($needsAdmin);
+
 		session_start();
 
 		global $conf;
 		$client_id = $conf["google_client_id"];
 		$client_secret = $conf["google_client_secret"];
-		$redirect_uri = $conf["base_url"] . "index.php";
+		$redirect_uri = $conf["base_url"] . "login.php";
 
 		$client = new Google_Client();
 		$client->setClientId($client_id);
 		$client->setClientSecret($client_secret);
 		$client->setRedirectUri($redirect_uri);
-		$client->setScopes('email');
+		$client->setScopes("email");
 
-		if (isset($_REQUEST['logout']))
+		if(empty($_SESSION["google_token"]) || !isset($_SESSION["google_token"]["id_token"]))
 		{
-			unset($_SESSION['access_token']);
-		}
-
-		if (isset($_GET['code']))
-		{
-			$client->authenticate($_GET['code']);
-			$_SESSION['access_token'] = $client->getAccessToken();
-			$redirect = $conf["base_url"];
-			header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));
-			exit();
-		}
-
-		if (isset($_SESSION['access_token']) && $_SESSION['access_token']) {
-			$client->setAccessToken($_SESSION['access_token']);
-		}
-		else
-		{
+			$_SESSION["redirect"] = $_SERVER["REQUEST_URI"] . $_SERVER["QUERY_STRING"];
 			$authUrl = $client->createAuthUrl();
-			header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+			header("Location: " . filter_var($authUrl, FILTER_SANITIZE_URL));
 			exit();
 		}
 
-		if ($client->getAccessToken())
+		$client->setAccessToken($_SESSION["google_token"]);
+		$token_data = $client->verifyIdToken();
+
+		if(!empty($token_data["email"]))
 		{
-			$_SESSION['access_token'] = $client->getAccessToken();
-			$token_data = $client->verifyIdToken()->getAttributes();
+			$emailAddress = $token_data["email"];
 
-			if (!empty($token_data['payload']['email'])) {
-				$emailAddress = $token_data['payload']['email'];
+			$db = colonyConnectDatabase();
 
-				$db = colonyConnectDatabase();
+			$statement = $db->prepare("
+				SELECT
+					displayName,
+					ID,
+					isAdmin,
+					theme
+				FROM col_players
+				WHERE emailAddress = :email
+			");
+			$statement->bindValue("email", $emailAddress);
+			$statement->execute();
 
-				$statement = $db->prepare("
-					SELECT
-						displayName,
-						ID,
-						isAdmin,
-						theme
-					FROM col_players
-					WHERE emailAddress = :email
-				");
-				$statement->bindValue("email", $emailAddress);
-				$statement->execute();
+			# Break on the first player found
+			$player = NULL;
+			while(FALSE !== ($row = $statement->fetch()))
+			{
+				$playerID = intval($row["ID"]);
 
-				# Break on the first player found
-				$player = NULL;
-				while(FALSE !== ($row = $statement->fetch()))
-				{
-					$playerID = intval($row['ID']);
-
-					$player = array(
-						"displayName" => htmlspecialchars($row["displayName"]),
-						"emailAddress" => htmlspecialchars($emailAddress),
-						"ID" => $playerID,
-						"isAdmin" => intval($row["isAdmin"]),
-						"theme" => intval($row["theme"])
-					);
-					break;
-				}
-				$statement->closeCursor();
-
-				if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
-					return array($db, $player);
+				$player = array(
+					"displayName" => htmlspecialchars($row["displayName"]),
+					"emailAddress" => htmlspecialchars($emailAddress),
+					"ID" => $playerID,
+					"isAdmin" => intval($row["isAdmin"]),
+					"theme" => intval($row["theme"])
+				);
+				break;
 			}
+			$statement->closeCursor();
+
+			if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
+				return array($db, $player);
 		}
 
 		header("HTTP/1.0 401 Unauthorized");
