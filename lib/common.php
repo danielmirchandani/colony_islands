@@ -292,9 +292,9 @@
 		$client->setRedirectUri($redirect_uri);
 		$client->setScopes("email");
 
-		if(!empty($_SESSION["id_token"]) && isset($_SESSION["id_token"]["id_token"]))
+		if(!empty($_SESSION["google_token"]) && isset($_SESSION["google_token"]["id_token"]))
 		{
-			$client->setAccessToken($_SESSION["id_token"]);
+			$client->setAccessToken($_SESSION["google_token"]);
 		}
 		else
 		{
@@ -306,7 +306,7 @@
 
 		if ($client->getAccessToken())
 		{
-			$_SESSION["id_token"] = $client->getAccessToken();
+			$_SESSION["google_token"] = $client->getAccessToken();
 			$token_data = $client->verifyIdToken();
 
 			if (!empty($token_data["email"])) {

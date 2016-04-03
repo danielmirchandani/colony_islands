@@ -19,5 +19,5 @@
 	$token = $client->fetchAccessTokenWithAuthCode($_GET["code"]);
 
 	session_start();
-	$_SESSION["id_token"] = $token;
+	$_SESSION["google_token"] = $token;
 	header("Location: " . filter_var($_SESSION["redirect"], FILTER_SANITIZE_URL));
