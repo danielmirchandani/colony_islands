@@ -234,7 +234,7 @@
 	{
 		# For safety while developing, use HTTP authentication in
 		# addition
-		list($db, $player) = colonyAuthenticateHTTP($needsAdmin);
+		colonyAuthenticateHTTP($needsAdmin);
 
 		session_start();
 
@@ -249,11 +249,7 @@
 		$client->setRedirectUri($redirect_uri);
 		$client->setScopes("email");
 
-		if(!empty($_SESSION["google_token"]) && isset($_SESSION["google_token"]["id_token"]))
-		{
-			$client->setAccessToken($_SESSION["google_token"]);
-		}
-		else
+		if(empty($_SESSION["google_token"]) || !isset($_SESSION["google_token"]["id_token"]))
 		{
 			$_SESSION["redirect"] = $_SERVER["REQUEST_URI"] . $_SERVER["QUERY_STRING"];
 			$authUrl = $client->createAuthUrl();
@@ -261,48 +257,46 @@
 			exit();
 		}
 
-		if ($client->getAccessToken())
+		$client->setAccessToken($_SESSION["google_token"]);
+		$token_data = $client->verifyIdToken();
+
+		if(!empty($token_data["email"]))
 		{
-			$_SESSION["google_token"] = $client->getAccessToken();
-			$token_data = $client->verifyIdToken();
+			$emailAddress = $token_data["email"];
 
-			if (!empty($token_data["email"])) {
-				$emailAddress = $token_data["email"];
+			$db = colonyConnectDatabase();
 
-				$db = colonyConnectDatabase();
+			$statement = $db->prepare("
+				SELECT
+					displayName,
+					ID,
+					isAdmin,
+					theme
+				FROM col_players
+				WHERE emailAddress = :email
+			");
+			$statement->bindValue("email", $emailAddress);
+			$statement->execute();
 
-				$statement = $db->prepare("
-					SELECT
-						displayName,
-						ID,
-						isAdmin,
-						theme
-					FROM col_players
-					WHERE emailAddress = :email
-				");
-				$statement->bindValue("email", $emailAddress);
-				$statement->execute();
+			# Break on the first player found
+			$player = NULL;
+			while(FALSE !== ($row = $statement->fetch()))
+			{
+				$playerID = intval($row["ID"]);
 
-				# Break on the first player found
-				$player = NULL;
-				while(FALSE !== ($row = $statement->fetch()))
-				{
-					$playerID = intval($row["ID"]);
-
-					$player = array(
-						"displayName" => htmlspecialchars($row["displayName"]),
-						"emailAddress" => htmlspecialchars($emailAddress),
-						"ID" => $playerID,
-						"isAdmin" => intval($row["isAdmin"]),
-						"theme" => intval($row["theme"])
-					);
-					break;
-				}
-				$statement->closeCursor();
-
-				if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
-					return array($db, $player);
+				$player = array(
+					"displayName" => htmlspecialchars($row["displayName"]),
+					"emailAddress" => htmlspecialchars($emailAddress),
+					"ID" => $playerID,
+					"isAdmin" => intval($row["isAdmin"]),
+					"theme" => intval($row["theme"])
+				);
+				break;
 			}
+			$statement->closeCursor();
+
+			if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
+				return array($db, $player);
 		}
 
 		header("HTTP/1.0 401 Unauthorized");
