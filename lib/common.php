@@ -154,7 +154,7 @@
 	}
 
 	/**
-         * Returns the result of calling colonyAuthenticateHTTP.
+	 * Returns the result of calling colonyAuthenticateHTTP.
 	 */
 	function colonyAuthenticate($needsAdmin = FALSE)
 	{
