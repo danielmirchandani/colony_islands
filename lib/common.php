@@ -249,59 +249,54 @@
 		$client->setRedirectUri($redirect_uri);
 		$client->setScopes("email");
 
-		if(empty($_SESSION["google_token"]) || !isset($_SESSION["google_token"]["id_token"]))
+		if(!empty($_SESSION["google_token"]) && isset($_SESSION["google_token"]["id_token"]))
 		{
-			$_SESSION["redirect"] = $_SERVER["REQUEST_URI"] . $_SERVER["QUERY_STRING"];
-			$authUrl = $client->createAuthUrl();
-			header("Location: " . filter_var($authUrl, FILTER_SANITIZE_URL));
-			exit();
-		}
+			$client->setAccessToken($_SESSION["google_token"]);
+			$token_data = $client->verifyIdToken();
 
-		$client->setAccessToken($_SESSION["google_token"]);
-		$token_data = $client->verifyIdToken();
-
-		if(!empty($token_data["email"]))
-		{
-			$emailAddress = $token_data["email"];
-
-			$db = colonyConnectDatabase();
-
-			$statement = $db->prepare("
-				SELECT
-					displayName,
-					ID,
-					isAdmin,
-					theme
-				FROM col_players
-				WHERE emailAddress = :email
-			");
-			$statement->bindValue("email", $emailAddress);
-			$statement->execute();
-
-			# Break on the first player found
-			$player = NULL;
-			while(FALSE !== ($row = $statement->fetch()))
+			if((FALSE !== $token_data) && !empty($token_data["email"]))
 			{
-				$playerID = intval($row["ID"]);
+				$emailAddress = $token_data["email"];
 
-				$player = array(
-					"displayName" => htmlspecialchars($row["displayName"]),
-					"emailAddress" => htmlspecialchars($emailAddress),
-					"ID" => $playerID,
-					"isAdmin" => intval($row["isAdmin"]),
-					"theme" => intval($row["theme"])
-				);
-				break;
+				$db = colonyConnectDatabase();
+
+				$statement = $db->prepare("
+					SELECT
+						displayName,
+						ID,
+						isAdmin,
+						theme
+					FROM col_players
+					WHERE emailAddress = :email
+				");
+				$statement->bindValue("email", $emailAddress);
+				$statement->execute();
+
+				# Break on the first player found
+				$player = NULL;
+				while(FALSE !== ($row = $statement->fetch()))
+				{
+					$playerID = intval($row["ID"]);
+
+					$player = array(
+						"displayName" => htmlspecialchars($row["displayName"]),
+						"emailAddress" => htmlspecialchars($emailAddress),
+						"ID" => $playerID,
+						"isAdmin" => intval($row["isAdmin"]),
+						"theme" => intval($row["theme"])
+					);
+					break;
+				}
+				$statement->closeCursor();
+
+				if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
+					return array($db, $player);
 			}
-			$statement->closeCursor();
-
-			if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
-				return array($db, $player);
 		}
 
-		header("HTTP/1.0 401 Unauthorized");
-		header("WWW-Authenticate: Basic realm=\"Colony Islands\"");
-		colonyError("Invalid username/password. Contact Dan for assistance.");
+		$_SESSION["redirect"] = $_SERVER["REQUEST_URI"] . $_SERVER["QUERY_STRING"];
+		$authUrl = $client->createAuthUrl();
+		header("Location: " . filter_var($authUrl, FILTER_SANITIZE_URL));
 	}
 
 	/**
