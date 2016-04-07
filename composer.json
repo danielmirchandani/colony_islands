@@ -1,6 +1,14 @@
 {
-    "name": "danielmirchandani/colony_islands",
-    "require": {
-        "google/apiclient": "^2.0.0@RC"
-    }
+	"description": "A web- and email-based implementation of Settlers of Catan",
+	"license": "MIT",
+	"name": "danielmirchandani/colony_islands",
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/danielmirchandani/google-api-php-client"
+		}
+	],
+	"require": {
+		"google/apiclient": "dev-issue-916"
+	}
 }
