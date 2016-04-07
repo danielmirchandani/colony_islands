@@ -584,46 +584,6 @@
 		return $db;
 	}
 
-	function colonyCookieSession($value, $expireSeconds)
-	{
-		global $conf;
-		$parts = parse_url($conf["base_url"]);
-		setcookie("sessionID", $value, time() + $expireSeconds, $parts["path"], $parts["host"], TRUE, TRUE);
-	}
-
-	# This is no longer used, but I'm keeping it around for posterity
-	function colonyEncodeJSON($var)
-	{
-		if(is_array($var))
-		{
-			$first = TRUE;
-			$ret = "{";
-			foreach($var as $key => $val)
-			{
-				if($first)
-					$first = FALSE;
-				else
-					$ret .= ",";
-				$ret .= ("\"$key\":" . colonyEncodeJSON($val));
-			}
-			$ret .= "}";
-			return $ret;
-		}
-		else if(is_bool($var))
-		{
-			if($var)
-				return "true";
-			else
-				return "false";
-		}
-		else if(is_float($var) || is_int($var))
-			return "$var";
-		else if(is_string($var))
-			return "\"$var\"";
-		else
-			colonyError("Unknown type for $var");
-	}
-
 	function colonyEnd()
 	{
 		ob_end_flush();
