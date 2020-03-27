@@ -119,14 +119,6 @@
 		</select>
 	</div>
 	<div class="form-group">
-		<label for="changeInfoPassword">Password (leave blank to keep same)</label>
-		<input class="form-control" id="changeInfoPassword" name="password" type="password">
-	</div>
-	<div class="form-group">
-		<label for="changeInfoConfirmPassword">Confirm password (leave blank to keep same)</label>
-		<input class="form-control" id="changeInfoConfirmPassword" name="confirmPassword" type="password">
-	</div>
-	<div class="form-group">
 		<input class="btn btn-primary" type="submit" value="Submit">
 	</div>
 </form>
@@ -190,36 +182,6 @@
 	</div>
 	<div class="form-group">
 		<input class="btn btn-primary" type="submit" value="Alert Everyone">
-	</div>
-</form>
-<h1>Reset password</h1>
-<form action="resetPassword.php" method="POST">
-	<div class="form-group">
-		<label for="resetPasswordPlayerID">Player</label>
-		<select class="form-control" id="resetPasswordPlayerID" name="playerID">
-<?php
-		$statement = $db->prepare("
-			SELECT
-				`displayName`,
-				`ID`
-			FROM `col_players`
-		");
-		$statement->execute();
-
-		while(FALSE !== ($row = $statement->fetch()))
-		{
-			$displayName = htmlspecialchars($row["displayName"]);
-			$playerID = intval($row["ID"]);
-?>
-			<option value="<?php echo($playerID);?>"><?php echo($displayName);?></option>
-<?php
-		}
-		$statement->closeCursor();
-?>
-		</select>
-	</div>
-	<div class="form-group">
-		<input class="btn btn-primary" type="submit" value="Reset Password">
 	</div>
 </form>
 </div>

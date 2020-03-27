@@ -1,6 +1,5 @@
 <?php
 	require("config.php");
-	require("PasswordHash.php");
 
 	# Composer autoloader
 	require(__DIR__ . "/../vendor/autoload.php");
@@ -154,88 +153,20 @@
 	}
 
 	/**
-	 * Returns the result of calling colonyAuthenticateHTTP.
+	 * Returns the result of calling colonyAuthenticateGoogleIdentity.
 	 */
 	function colonyAuthenticate($needsAdmin = FALSE)
 	{
-		return colonyAuthenticateHTTP($needsAdmin);
+		return colonyAuthenticateGoogleIdentity($needsAdmin);
 	}
 
 	/**
 	 * Returns an array of (database connection, player information) where
-	 * "player information" is NULL if not authenticated or an array with
-	 * keys ("displayName", "emailAddress", "ID", "isAdmin").
+	 * "player information" is an array with keys ("displayName",
+	 * "emailAddress", "ID", "isAdmin"). If the user isn't authenticated, 
 	 */
-	function colonyAuthenticateEmailPassword($emailAddress, $password)
-	{
-		$db = colonyConnectDatabase();
-
-		$statement = $db->prepare("
-			SELECT
-				displayName,
-				ID,
-				isAdmin,
-				theme,
-				passwordHash
-			FROM col_players
-			WHERE emailAddress = :email
-		");
-		$statement->bindValue("email", $emailAddress);
-		$statement->execute();
-
-		# A login might not return a single row, so break on a match
-		$player = NULL;
-		while(FALSE !== ($row = $statement->fetch()))
-		{
-			$dbHash = $row['passwordHash'];
-			$playerID = intval($row['ID']);
-
-			# Password hashes starting with a '$' use the PasswordHash
-			# library and older hashes created using `md5` need to be
-			# upgraded if the login works
-			if($dbHash[0] === '$')
-			{
-				if(!colonyGetPasswordHasher()->CheckPassword($password, $dbHash))
-					continue;
-			}
-			else
-			{
-				# Don't upgrade hashes that don't match
-				if($dbHash != md5($password))
-					continue;
-
-				$statement2 = $db->prepare('
-					UPDATE col_players
-					SET passwordHash = :newHash
-					WHERE ID = :player
-				');
-				$statement2->bindValue('newHash', colonyHashPassword($password));
-				$statement2->bindValue('player', $playerID);
-				$statement2->execute();
-				$statement2->closeCursor();
-			}
-
-			$player = array(
-				"displayName" => htmlspecialchars($row["displayName"]),
-				"emailAddress" => htmlspecialchars($emailAddress),
-				"ID" => $playerID,
-				"isAdmin" => intval($row["isAdmin"]),
-				"theme" => intval($row["theme"])
-			);
-
-			break;
-		}
-		$statement->closeCursor();
-
-		return array($db, $player);
-	}
-
 	function colonyAuthenticateGoogleIdentity($needsAdmin = FALSE)
 	{
-		# For safety while developing, use HTTP authentication in
-		# addition
-		colonyAuthenticateHTTP($needsAdmin);
-
 		session_start();
 
 		global $conf;
@@ -297,27 +228,6 @@
 		$_SESSION["redirect"] = $_SERVER["REQUEST_URI"] . $_SERVER["QUERY_STRING"];
 		$authUrl = $client->createAuthUrl();
 		header("Location: " . filter_var($authUrl, FILTER_SANITIZE_URL));
-	}
-
-	/**
-	 * Returns the result of calling colonyAuthenticateEmailPassword with
-	 * the email address and password provided via HTTP authentication or
-	 * sends a request for authentication if not authenticated.
-	 */
-	function colonyAuthenticateHTTP($needsAdmin = FALSE)
-	{
-		if(array_key_exists("PHP_AUTH_USER", $_SERVER))
-		{
-			$emailAddress = $_SERVER["PHP_AUTH_USER"];
-			$password = $_SERVER["PHP_AUTH_PW"];
-			list ($db, $player) = colonyAuthenticateEmailPassword($emailAddress, $password);
-			if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
-				return array($db, $player);
-		}
-
-		header("HTTP/1.0 401 Unauthorized");
-		header("WWW-Authenticate: Basic realm=\"Colony Islands\"");
-		colonyError("Invalid username/password. Contact Dan for assistance.");
 	}
 
 	function colonyCheckLongestRoad($gameID, $playerID)
@@ -629,11 +539,6 @@
 		return array_key_exists($key, $_GET);
 	}
 
-	function colonyGetPasswordHasher()
-	{
-		return new PasswordHash(8, FALSE);
-	}
-
 	function colonyGetResource($gameID, $playerID, $type, $num)
 	{
 		global $db;
@@ -656,11 +561,6 @@
 		$statement->bindValue("type", $type);
 		$statement->execute();
 		$statement->closeCursor();
-	}
-
-	function colonyHashPassword($password)
-	{
-		return colonyGetPasswordHasher()->HashPassword($password);
 	}
 
 	function colonyHTMLEnd()

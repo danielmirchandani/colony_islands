@@ -19,24 +19,21 @@
 		colonyError("An unregistered e-mail address must be provided to create a player");
 	$statement->closeCursor();
 
-	$newPassword = colonyGeneratePassword();
-
 	$statement = $db->prepare("
 		INSERT INTO `col_players`
 		SET
 			`displayName` = :name,
 			`emailAddress` = :email,
-			`passwordHash` = :hash
+			`passwordHash` = ''
 	");
 	$statement->bindValue("name", $displayName);
 	$statement->bindValue("email", $emailAddress);
-	$statement->bindValue("hash", colonyHashPassword($newPassword));
 	$statement->execute();
 
 	if(1 !== $statement->rowCount())
 		colonyError("Error creating player");
 	$statement->closeCursor();
 
-	colonyAlertPlayer($displayName, $emailAddress, "Welcome", "Welcome to Colony Islands. Your username is this e-mail address and your password is \"$newPassword\".");
+	colonyAlertPlayer($displayName, $emailAddress, "Welcome", "Welcome to Colony Islands. Visiting the site for the first time will ask which Google account you want to use while playing. You must choose the account matching this email address, otherwise you might get stuck in a login loop. Contact Dan or whomever got you an account for assistance.");
 	header("Location: index.php");
 ?>
