@@ -81,31 +81,31 @@
 
 	# For funny pictures when hovering over cards
 	$CARD_PATTERNS = array(
-		'/Brick/',
-		'/Grain/',
-		'/Lumber/',
-		'/Ore/',
-		'/Wool/',
-		"/Monopoly/",
-		"/Road Building/",
-		"/Soldier/",
-		"/Victory Point/",
-		"/Year of Plenty/"
+		// '/Brick/',
+		// '/Grain/',
+		// '/Lumber/',
+		// '/Ore/',
+		// '/Wool/',
+		// "/Monopoly/",
+		// "/Road Building/",
+		// "/Soldier/",
+		// "/Victory Point/",
+		// "/Year of Plenty/"
 	);
 	# The meaning of the ALT attribute for an IMG tag is how to replace the
 	# image with equivalent text. These are purely decorative, so they have
 	# empty-string alternative text.
 	$CARD_IMAGE_HTML = array(
-		'<a class="hoverShowIMG" href="images/brick.jpg"><img alt="" src="images/brick.jpg">Brick</a>',
-		'<a class="hoverShowIMG" href="images/grain.jpg"><img alt="" src="images/grain.jpg">Grain</a>',
-		'<a class="hoverShowIMG" href="images/lumber.jpg"><img alt="" src="images/lumber.jpg">Lumber</a>',
-		'<a class="hoverShowIMG" href="images/ore.jpg"><img alt="" src="images/ore.jpg">Ore</a>',
-		'<a class="hoverShowIMG" href="images/wool.jpg"><img alt="" src="images/wool.jpg">Wool</a>',
-		'<a class="hoverShowIMG" href="images/monopoly.jpg"><img alt="" src="images/monopoly.jpg">Monopoly</a>',
-		'<a class="hoverShowIMG" href="images/roadBuilding.jpg"><img alt="" src="images/roadBuilding.jpg">Road Building</a>',
-		'<a class="hoverShowIMG" href="images/soldier.jpg"><img alt="" src="images/soldier.jpg">Soldier</a>',
-		'<a class="hoverShowIMG" href="images/victoryPoint.jpg"><img alt="" src="images/victoryPoint.jpg">Victory Point</a>',
-		'<a class="hoverShowIMG" href="images/yearOfPlenty.jpg"><img alt="" src="images/yearOfPlenty.jpg">Year of Plenty</a>'
+		// '<a class="hoverShowIMG" href="images/brick.jpg"><img alt="" src="images/brick.jpg">Brick</a>',
+		// '<a class="hoverShowIMG" href="images/grain.jpg"><img alt="" src="images/grain.jpg">Grain</a>',
+		// '<a class="hoverShowIMG" href="images/lumber.jpg"><img alt="" src="images/lumber.jpg">Lumber</a>',
+		// '<a class="hoverShowIMG" href="images/ore.jpg"><img alt="" src="images/ore.jpg">Ore</a>',
+		// '<a class="hoverShowIMG" href="images/wool.jpg"><img alt="" src="images/wool.jpg">Wool</a>',
+		// '<a class="hoverShowIMG" href="images/monopoly.jpg"><img alt="" src="images/monopoly.jpg">Monopoly</a>',
+		// '<a class="hoverShowIMG" href="images/roadBuilding.jpg"><img alt="" src="images/roadBuilding.jpg">Road Building</a>',
+		// '<a class="hoverShowIMG" href="images/soldier.jpg"><img alt="" src="images/soldier.jpg">Soldier</a>',
+		// '<a class="hoverShowIMG" href="images/victoryPoint.jpg"><img alt="" src="images/victoryPoint.jpg">Victory Point</a>',
+		// '<a class="hoverShowIMG" href="images/yearOfPlenty.jpg"><img alt="" src="images/yearOfPlenty.jpg">Year of Plenty</a>'
 	);
 
 	# This keeps track of output-buffering so colonyError knows if to clear
