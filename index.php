@@ -186,6 +186,11 @@
 </form>
 </div>
 </div>
+<div class="row">
+<div class="col-xs-12">
+	<p>Colony Islands is <a href="https://github.com/danielmirchandani/colony_islands">open-source</a>.</p>
+</div>
+</div>
 <?php
 	}
 	colonyHTMLEnd();
