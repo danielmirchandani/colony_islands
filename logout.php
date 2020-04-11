@@ -2,7 +2,7 @@
 	require("lib/common.php");
 
 	session_start();
-	unset($_SESSION['google_token']);
+	$_SESSION = array();
 
 	colonyHTMLStart();
 ?>

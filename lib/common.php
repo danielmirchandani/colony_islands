@@ -221,7 +221,16 @@
 				$statement->closeCursor();
 
 				if((NULL !== $player) && (!$needsAdmin || (1 === $player["isAdmin"])))
+				{
+					$_SESSION["email"] = $emailAddress;
 					return array($db, $player);
+				}
+			}
+			# If a user authenticated before, use their email as a
+			# hint to authenticate again.
+			else if(isset($_SESSION["email"]))
+			{
+				$client->setLoginHint($_SESSION["email"]);
 			}
 		}
 
