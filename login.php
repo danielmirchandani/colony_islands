@@ -19,5 +19,8 @@
 	$token = $client->fetchAccessTokenWithAuthCode($_GET["code"]);
 
 	session_start();
+	# Google tokens expire frequently enough that we can use it to
+	# regenerate session IDs to avoid session fixation.
+	session_regenerate_id();
 	$_SESSION["google_token"] = $token;
 	header("Location: " . filter_var($_SESSION["redirect"], FILTER_SANITIZE_URL));

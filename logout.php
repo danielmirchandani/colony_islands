@@ -3,8 +3,6 @@
 
 	session_start();
 	unset($_SESSION['google_token']);
-	// Create a new session id to prevent session fixation.
-	session_regenerate_id();
 
 	colonyHTMLStart();
 ?>
