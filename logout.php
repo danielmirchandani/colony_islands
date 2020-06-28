@@ -4,9 +4,9 @@
 	session_start();
 	$_SESSION = array();
 
-	colonyHTMLStart();
+	colonyHTMLHeader();
 ?>
 <p>You are now logged out. Thanks for playing!</p>
 <?php
-	colonyHTMLEnd();
+	colonyHTMLFooter();
 ?>
