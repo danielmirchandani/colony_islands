@@ -1,3 +1,6 @@
+# Exclude composer local installation
+composer.phar
+
 # Exclude local configuration
 lib/config.php
 
