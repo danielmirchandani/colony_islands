@@ -3,6 +3,9 @@
 	"license": "MIT",
 	"name": "danielmirchandani/colony_islands",
 	"require": {
-		"google/apiclient": "^2.0.0@RC"
+		"google/apiclient": "^2.7"
+	},
+	"scripts": {
+		"post-update-cmd": "Google\\Task\\Composer::cleanup"
 	}
 }
